@@ -1,24 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Personal Homepage</title>
-  <style>
-    body {
-      background-color: #000;
-      color: #fff;
-      margin: 0;
-      padding: 2rem;
-      font-family: Arial, sans-serif;
-    }
-    a {
-      color: #1e90ff;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
-  <h1>Welcome to my personal homepage</h1>
-  <p>This is a minimal black-and-white webpage.</p>
-</body>
-</html> 
+  <head>
+    <meta charset="UTF-8" />
+    <title>Personal Homepage</title>
+    <style>
+      body {
+        background-color: #000;
+        color: #fff;
+        margin: 0;
+        padding: 2rem 15%;
+        font-family: Arial, sans-serif;
+      }
+      a {
+        color: #1e90ff;
+        text-decoration: none;
+      }
+      /* layout for personal section */
+      #personal {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 2rem;
+      }
+      #personal .info {
+        flex: 1;
+      }
+      #personal .photo {
+        width: 150px;
+        height: 150px;
+        background-color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>TigerKid</h1>
+    <p>Welcome to my homepage</p>
+
+    <section id="personal">
+      <div class="info">
+        <h2>Personal Information</h2>
+        <p>Name: Tigerkid Yang（杨润畅）</p>
+        <p>Email: runchangyang@gmail.com</p>
+      </div>
+      <div class="photo">
+        <!-- Photo Placeholder -->
+      </div>
+    </section>
+
+    <section id="education">
+      <h2>Education</h2>
+      <ul>
+        <li>
+          2022 – : B.Sc. in Mathematics, Shanghai University of Finance and
+          Economics
+        </li>
+      </ul>
+    </section>
+
+    <section id="projects">
+      <h2>Projects</h2>
+      <ul>
+        <li><a href="https://github.com/TigerkidYang/HackerCNews">HackerCNews</a></li>
+      </ul>
+    </section>
+  </body>
+</html>
