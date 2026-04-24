@@ -8,7 +8,10 @@ Open `index.html` directly in a browser, or serve this folder with any static fi
 
 ## Current commands
 
-- `ls` lists available pages and posts.
-- `open <slug>` or `cat <slug>` opens content.
+- `ls` lists the current directory.
+- `cd <directory>` enters a directory.
+- `cd ..` goes up one directory.
+- `open <file>` or `cat <file>` opens content by name or path.
+- `pwd` shows the current path.
 - `help` shows available commands.
 - `clear` clears the terminal output.

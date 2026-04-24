@@ -165,8 +165,7 @@ p {
   color: var(--muted);
 }
 
-.command-echo::before {
-  content: "visitor@site:~$ ";
+.echo-prompt {
   color: var(--green);
 }
 
