@@ -546,10 +546,7 @@ function changeDirectory(target, commandText = `cd ${target}`, options = {}) {
 }
 
 async function openRemotePost(node, commandText = `open ${node.repoPath}`, options = {}) {
-  const parentPath =
-    node.repoPath === "README.md"
-      ? []
-      : ["cs-self-study", ...node.repoPath.split("/").slice(0, -1)];
+  const parentPath = node.repoPath === "README.md" ? [] : ["cs-self-study"];
   const parentTarget = parentPath.length ? `~/${parentPath.join("/")}` : "~";
   currentPath = parentPath;
   if (!options.skipRoute) {
@@ -569,9 +566,13 @@ async function openRemotePost(node, commandText = `open ${node.repoPath}`, optio
 
     const markdown = await response.text();
     const articleHtml = markdownToHtml(markdown, node.repoPath);
+    const articleNav =
+      node.repoPath === "README.md"
+        ? `<button class="link-command" data-cd="${parentTarget}">back to ${escapeHtml(displayPath(parentPath))}</button>`
+        : `<button class="link-command" data-open="~/cs-self-study/README.md">back to cs-self-study/README.md</button>`;
     const block = renderScreen(
       commandText,
-      `<article class="article markdown-article">${articleHtml}<p class="article-nav"><button class="link-command" data-cd="${parentTarget}">back to ${escapeHtml(displayPath(parentPath))}</button> <a class="link-command" href="${blobUrlFor(node.repoPath)}" target="_blank" rel="noreferrer">view on GitHub</a></p></article>`,
+      `<article class="article markdown-article">${articleHtml}<p class="article-nav">${articleNav} <a class="link-command" href="${blobUrlFor(node.repoPath)}" target="_blank" rel="noreferrer">view on GitHub</a></p></article>`,
     );
     enhanceArticle(block.querySelector(".markdown-article"));
   } catch (error) {
