@@ -33,36 +33,26 @@
 
         <div id="terminal" class="terminal" tabindex="-1">
           <div class="intro">
-            <pre class="ascii" aria-hidden="true">
- _______ _               _    _     _ 
-|__   __(_)             | |  (_)   | |
-   | |   _  __ _  ___   | | ___  __| |
-   | |  | |/ _` |/ _ \  | |/ / |/ _` |
-   | |  | | (_| |  __/  |   <| | (_| |
-   |_|  |_|\__, |\___|  |_|\_\_|\__,_|
-            __/ |                      
-           |___/                       
-            </pre>
+            <p class="ascii" aria-hidden="true">TigerKid Terminal Blog</p>
             <p>
               Welcome. Type <button class="inline-command" data-command="help">help</button>
               or <button class="inline-command" data-command="ls">ls</button> to begin.
             </p>
           </div>
           <div id="output" class="output"></div>
+          <form id="command-form" class="command-line" autocomplete="off">
+            <label class="prompt" for="command-input">visitor@site:~$</label>
+            <input
+              id="command-input"
+              name="command"
+              type="text"
+              spellcheck="false"
+              autocapitalize="off"
+              aria-label="Terminal command"
+              autofocus
+            />
+          </form>
         </div>
-
-        <form id="command-form" class="command-line" autocomplete="off">
-          <label class="prompt" for="command-input">visitor@site:~$</label>
-          <input
-            id="command-input"
-            name="command"
-            type="text"
-            spellcheck="false"
-            autocapitalize="off"
-            aria-label="Terminal command"
-            autofocus
-          />
-        </form>
       </section>
     </main>
 
