@@ -215,14 +215,66 @@ input {
   font-size: 0.68rem;
 }
 
+.logo-stage {
+  position: relative;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 12px;
+  padding: 14px 18px 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklch, var(--green), transparent 46%);
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, rgba(255, 211, 106, 0.12), transparent 14% 86%, rgba(92, 200, 255, 0.1)),
+    rgba(63, 245, 138, 0.035);
+  box-shadow:
+    inset 0 0 34px rgba(63, 245, 138, 0.09),
+    0 0 32px rgba(63, 245, 138, 0.16);
+  animation: logo-power 1100ms var(--ease-out-expo) both;
+}
+
+.logo-stage::before,
+.logo-stage::after {
+  content: attr(data-label);
+  position: absolute;
+  inset: auto 18px 12px auto;
+  font-size: 0.68rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.logo-stage::before {
+  color: var(--red);
+  opacity: 0.58;
+  transform: translate(-2px, -1px);
+  animation: logo-glitch-red 2.8s steps(2, end) infinite;
+}
+
+.logo-stage::after {
+  color: var(--cyan);
+  opacity: 0.58;
+  transform: translate(2px, 1px);
+  animation: logo-glitch-cyan 3.4s steps(2, end) infinite;
+}
+
 .ascii {
-  margin: 0 0 10px;
+  position: relative;
+  z-index: 1;
+  margin: 0;
   color: var(--green);
-  font-size: 0.78rem;
+  font-size: 1.05rem;
   line-height: 1;
   white-space: pre;
   overflow-x: auto;
-  filter: drop-shadow(0 0 14px rgba(63, 245, 138, 0.32));
+  text-shadow:
+    0 0 5px rgba(63, 245, 138, 0.55),
+    0 0 18px rgba(63, 245, 138, 0.35),
+    2px 0 0 rgba(92, 200, 255, 0.16),
+    -2px 0 0 rgba(255, 107, 107, 0.12);
+  filter: drop-shadow(0 0 18px rgba(63, 245, 138, 0.42));
+  animation:
+    logo-scan 4.8s linear infinite,
+    logo-jolt 5.6s steps(1, end) infinite;
 }
 
 p {
@@ -535,6 +587,99 @@ p {
   }
 }
 
+@keyframes logo-power {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.72) translateY(-8px);
+    filter: brightness(2.2) saturate(0);
+  }
+  18% {
+    opacity: 0.4;
+    transform: scaleX(1.04) translateY(0);
+  }
+  24% {
+    opacity: 0.15;
+  }
+  36% {
+    opacity: 0.86;
+    filter: brightness(1.8) saturate(1.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1) translateY(0);
+    filter: brightness(1) saturate(1);
+  }
+}
+
+@keyframes logo-scan {
+  0% {
+    clip-path: inset(0 0 0 0);
+  }
+  46% {
+    clip-path: inset(0 0 0 0);
+  }
+  47% {
+    clip-path: inset(18% 0 54% 0);
+  }
+  48% {
+    clip-path: inset(0 0 0 0);
+  }
+  64% {
+    clip-path: inset(0 0 0 0);
+  }
+  65% {
+    clip-path: inset(62% 0 18% 0);
+  }
+  66% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes logo-jolt {
+  0%,
+  92%,
+  100% {
+    transform: translate(0, 0);
+  }
+  93% {
+    transform: translate(3px, -1px);
+  }
+  94% {
+    transform: translate(-2px, 1px);
+  }
+  95% {
+    transform: translate(1px, 0);
+  }
+}
+
+@keyframes logo-glitch-red {
+  0%,
+  88%,
+  100% {
+    opacity: 0.32;
+    transform: translate(-2px, -1px);
+  }
+  89%,
+  91% {
+    opacity: 0.8;
+    transform: translate(-7px, 1px);
+  }
+}
+
+@keyframes logo-glitch-cyan {
+  0%,
+  82%,
+  100% {
+    opacity: 0.28;
+    transform: translate(2px, 1px);
+  }
+  83%,
+  85% {
+    opacity: 0.78;
+    transform: translate(8px, -1px);
+  }
+}
+
 @keyframes command-materialize {
   from {
     opacity: 0;
@@ -585,6 +730,15 @@ p {
     padding: 18px;
   }
 
+  .logo-stage {
+    padding: 10px 10px 9px;
+  }
+
+  .logo-stage::before,
+  .logo-stage::after {
+    display: none;
+  }
+
   .ascii {
     font-size: 0.48rem;
   }
@@ -601,6 +755,12 @@ p {
   .command-line {
     align-items: center;
     flex-direction: row;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 980px) {
+  .ascii {
+    font-size: 0.78rem;
   }
 }
 
