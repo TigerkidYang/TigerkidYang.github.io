@@ -1,67 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="zh-CN">
   <head>
-    <meta charset="UTF-8" />
-    <title>Personal Homepage</title>
-    <style>
-      body {
-        background-color: #000;
-        color: #fff;
-        margin: 0;
-        padding: 2rem 15%;
-        font-family: Arial, sans-serif;
-      }
-      a {
-        color: #1e90ff;
-        text-decoration: none;
-      }
-      /* layout for personal section */
-      #personal {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 2rem;
-      }
-      #personal .info {
-        flex: 1;
-      }
-      #personal .photo {
-        width: 150px;
-        height: 150px;
-        background-color: #333;
-      }
-    </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Tigerkid Yang's terminal-inspired personal blog."
+    />
+    <title>Tigerkid Yang | Terminal Blog</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>TigerKid</h1>
-    <p>Welcome to my homepage</p>
+    <main class="terminal-shell" aria-label="Terminal blog">
+      <section class="terminal-window" aria-live="polite">
+        <header class="terminal-titlebar">
+          <div class="window-controls" aria-hidden="true">
+            <span class="control close"></span>
+            <span class="control minimize"></span>
+            <span class="control maximize"></span>
+          </div>
+          <p class="window-title">tigerkid@github-pages:~/blog</p>
+          <time id="clock" class="clock" datetime=""></time>
+        </header>
 
-    <section id="personal">
-      <div class="info">
-        <h2>Personal Information</h2>
-        <p>Name: Tigerkid Yang（杨润畅）</p>
-        <p>Email: runchangyang@gmail.com</p>
-      </div>
-      <div class="photo">
-        <!-- Photo Placeholder -->
-      </div>
-    </section>
+        <div id="terminal" class="terminal" tabindex="-1">
+          <div class="intro">
+            <pre class="ascii" aria-hidden="true">
+ _______ _               _    _     _ 
+|__   __(_)             | |  (_)   | |
+   | |   _  __ _  ___   | | ___  __| |
+   | |  | |/ _` |/ _ \  | |/ / |/ _` |
+   | |  | | (_| |  __/  |   <| | (_| |
+   |_|  |_|\__, |\___|  |_|\_\_|\__,_|
+            __/ |                      
+           |___/                       
+            </pre>
+            <p>
+              Welcome. Type <button class="inline-command" data-command="help">help</button>
+              or <button class="inline-command" data-command="ls">ls</button> to begin.
+            </p>
+          </div>
+          <div id="output" class="output"></div>
+        </div>
 
-    <section id="education">
-      <h2>Education</h2>
-      <ul>
-        <li>
-          2022 – : B.Sc. in Mathematics, Shanghai University of Finance and
-          Economics
-        </li>
-      </ul>
-    </section>
+        <form id="command-form" class="command-line" autocomplete="off">
+          <label class="prompt" for="command-input">visitor@site:~$</label>
+          <input
+            id="command-input"
+            name="command"
+            type="text"
+            spellcheck="false"
+            autocapitalize="off"
+            aria-label="Terminal command"
+            autofocus
+          />
+        </form>
+      </section>
+    </main>
 
-    <section id="projects">
-      <h2>Projects</h2>
-      <ul>
-        <li><a href="https://github.com/TigerkidYang/HackerCNews">HackerCNews</a></li>
-      </ul>
-    </section>
+    <script src="script.js"></script>
   </body>
 </html>
