@@ -70,14 +70,14 @@ function scrollToBottom() {
   terminal.scrollTop = terminal.scrollHeight;
 }
 
-function createBlock(commandText, html) {
+function renderScreen(commandText, html) {
   const block = document.createElement("section");
   block.className = "command-block";
   block.innerHTML = `
     <div class="command-echo">${escapeHtml(commandText)}</div>
     <div>${html}</div>
   `;
-  output.append(block);
+  output.replaceChildren(block);
   bindCommandButtons(block);
   scrollToBottom();
 }
@@ -117,20 +117,23 @@ function openEntry(slug, commandText = `open ${slug}`) {
   const entry = entries.find((item) => item.slug === slug || item.title === slug);
 
   if (!entry) {
-    createBlock(
+    renderScreen(
       commandText,
       `<p class="error">No such page: ${escapeHtml(slug)}. Try <button class="link-command" data-command="ls">ls</button>.</p>`,
     );
     return;
   }
 
-  createBlock(commandText, `<article class="article">${entry.body}</article>`);
+  renderScreen(
+    commandText,
+    `<article class="article">${entry.body}<p><button class="link-command" data-command="ls">back to ls</button></p></article>`,
+  );
 }
 
-commands.set("help", () => createBlock("help", renderHelp()));
-commands.set("ls", () => createBlock("ls", renderList()));
+commands.set("help", () => renderScreen("help", renderHelp()));
+commands.set("ls", () => renderScreen("ls", renderList()));
 commands.set("whoami", () =>
-  createBlock(
+  renderScreen(
     "whoami",
     "<p>Tigerkid Yang. Math student, builder, and owner of this tiny terminal-shaped corner of the web.</p>",
   ),
@@ -160,7 +163,7 @@ function runCommand(rawValue) {
 
   if (normalized === "cd") {
     const target = args.join(" ");
-    createBlock(
+    renderScreen(
       value,
       `<p><code>cd</code> is cosmetic here. Opening ${escapeHtml(target || "nothing")} instead.</p>`,
     );
@@ -177,7 +180,7 @@ function runCommand(rawValue) {
     return;
   }
 
-  createBlock(
+  renderScreen(
     value,
     `<p class="error">Command not found: ${escapeHtml(name)}. Try <button class="link-command" data-command="help">help</button>.</p>`,
   );
