@@ -58,6 +58,7 @@ const filesystem = {
       type: "dir",
       name: "cs-self-study",
       date: "remote",
+      openTarget: "cs-self-study/README.md",
       children: [
         remoteNote("README.md"),
         hiddenRemoteDir("Computer_Architecture", [
@@ -168,6 +169,7 @@ const clock = document.querySelector("#clock");
 const history = [];
 let historyIndex = 0;
 let currentPath = [];
+let activeRoute = "";
 
 function escapeHtml(value) {
   return value.replace(/[&<>"']/g, (char) => {
@@ -260,6 +262,57 @@ function resolveEntry(target) {
   const path = normalizePath(target);
   const node = getNode(path);
   return { node, path };
+}
+
+function routeForDirectory(path = currentPath) {
+  return path.length ? `#/dir/${encodeURIComponent(path.join("/"))}` : "#/";
+}
+
+function routeForEntryPath(path) {
+  return `#/open/${encodeURIComponent(path.join("/"))}`;
+}
+
+function routeForRemoteNote(repoPath) {
+  return `#/cs/${encodeURIComponent(repoPath)}`;
+}
+
+function setRoute(route) {
+  activeRoute = route;
+
+  if (window.location.hash !== route) {
+    window.location.hash = route;
+  }
+}
+
+function parseRoute() {
+  const hash = window.location.hash || "#/";
+
+  if (hash === "#/" || hash === "#") {
+    return { type: "dir", path: [] };
+  }
+
+  if (hash.startsWith("#/dir/")) {
+    return {
+      type: "dir",
+      path: decodeURIComponent(hash.slice("#/dir/".length)).split("/").filter(Boolean),
+    };
+  }
+
+  if (hash.startsWith("#/open/")) {
+    return {
+      type: "openPath",
+      path: decodeURIComponent(hash.slice("#/open/".length)).split("/").filter(Boolean),
+    };
+  }
+
+  if (hash.startsWith("#/cs/")) {
+    return {
+      type: "remote",
+      repoPath: decodeURIComponent(hash.slice("#/cs/".length)),
+    };
+  }
+
+  return { type: "dir", path: [] };
 }
 
 function findRemoteNoteByRepoPath(repoPath) {
@@ -464,9 +517,10 @@ function renderHelp() {
 
 function showDirectory(commandText = "ls") {
   renderScreen(commandText, renderList());
+  setRoute(routeForDirectory());
 }
 
-function changeDirectory(target, commandText = `cd ${target}`) {
+function changeDirectory(target, commandText = `cd ${target}`, options = {}) {
   const { node, path } = resolveEntry(target);
 
   if (!node) {
@@ -482,13 +536,25 @@ function changeDirectory(target, commandText = `cd ${target}`) {
     return;
   }
 
+  if (node.openTarget && !options.forceDirectory) {
+    openEntry(node.openTarget, `open ${target}`);
+    return;
+  }
+
   currentPath = path;
   showDirectory(commandText);
 }
 
-async function openRemotePost(node, commandText = `open ${node.repoPath}`) {
-  const parentPath = ["cs-self-study", ...node.repoPath.split("/").slice(0, -1)];
+async function openRemotePost(node, commandText = `open ${node.repoPath}`, options = {}) {
+  const parentPath =
+    node.repoPath === "README.md"
+      ? []
+      : ["cs-self-study", ...node.repoPath.split("/").slice(0, -1)];
   const parentTarget = parentPath.length ? `~/${parentPath.join("/")}` : "~";
+  currentPath = parentPath;
+  if (!options.skipRoute) {
+    setRoute(routeForRemoteNote(node.repoPath));
+  }
   renderScreen(
     commandText,
     `<article class="article markdown-article"><p class="meta">Loading ${escapeHtml(node.repoPath)} from GitHub...</p></article>`,
@@ -516,7 +582,7 @@ async function openRemotePost(node, commandText = `open ${node.repoPath}`) {
   }
 }
 
-async function openEntry(target, commandText = `open ${target}`) {
+async function openEntry(target, commandText = `open ${target}`, options = {}) {
   const { node, path } = resolveEntry(target);
 
   if (!node) {
@@ -528,13 +594,18 @@ async function openEntry(target, commandText = `open ${target}`) {
   }
 
   if (node.type === "dir") {
+    if (node.openTarget && !options.forceDirectory) {
+      openEntry(node.openTarget, `open ${target}`);
+      return;
+    }
+
     currentPath = path;
     showDirectory(`cd ${target}`);
     return;
   }
 
   if (node.type === "remotePost") {
-    await openRemotePost(node, commandText);
+    await openRemotePost(node, commandText, options);
     return;
   }
 
@@ -544,6 +615,9 @@ async function openEntry(target, commandText = `open ${target}`) {
     commandText,
     `<article class="article">${node.body}<p><button class="link-command" data-cd="${parentTarget}">back to ${escapeHtml(displayPath(parentPath))}</button></p></article>`,
   );
+  if (!options.skipRoute) {
+    setRoute(routeForEntryPath(path));
+  }
 }
 
 commands.set("help", () => renderScreen("help", renderHelp()));
@@ -643,8 +717,63 @@ input.addEventListener("keydown", (event) => {
 
 document.addEventListener("click", () => input.focus());
 
+function openEntryPath(path, commandText, options = {}) {
+  return openEntry(`~/${path.join("/")}`, commandText, options);
+}
+
+async function navigateFromHash() {
+  const route = parseRoute();
+  activeRoute = window.location.hash || "#/";
+
+  if (route.type === "dir") {
+    const node = getNode(route.path);
+
+    if (!node || node.type !== "dir") {
+      currentPath = [];
+      showDirectory("ls");
+      return;
+    }
+
+    if (node.openTarget) {
+      await openEntry(node.openTarget, `open ${route.path.join("/")}`, { skipRoute: true });
+      return;
+    }
+
+    currentPath = route.path;
+    showDirectory("ls");
+    return;
+  }
+
+  if (route.type === "openPath") {
+    await openEntryPath(route.path, `open ${route.path.join("/")}`, { skipRoute: true });
+    return;
+  }
+
+  if (route.type === "remote") {
+    const { node } = findRemoteNoteByRepoPath(route.repoPath);
+
+    if (node) {
+      await openRemotePost(node, `open ${route.repoPath}`, { skipRoute: true });
+      return;
+    }
+
+    renderScreen(
+      `open ${route.repoPath}`,
+      `<p class="error">No such remote note: ${escapeHtml(route.repoPath)}.</p>`,
+    );
+  }
+}
+
+window.addEventListener("hashchange", () => {
+  if ((window.location.hash || "#/") === activeRoute) {
+    return;
+  }
+
+  navigateFromHash();
+});
+
 bindCommandButtons();
 updatePrompt();
 updateClock();
 setInterval(updateClock, 30_000);
-showDirectory("ls");
+navigateFromHash();
