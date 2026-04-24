@@ -717,7 +717,18 @@ input.addEventListener("keydown", (event) => {
   }
 });
 
-document.addEventListener("click", () => input.focus());
+terminal.addEventListener("click", (event) => {
+  const selection = window.getSelection()?.toString();
+  const interactiveTarget = event.target.closest(
+    "a, button, input, label, pre, code, .markdown-article",
+  );
+
+  if (selection || interactiveTarget) {
+    return;
+  }
+
+  input.focus({ preventScroll: true });
+});
 
 function openEntryPath(path, commandText, options = {}) {
   return openEntry(`~/${path.join("/")}`, commandText, options);
