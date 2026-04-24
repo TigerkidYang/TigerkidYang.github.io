@@ -288,7 +288,7 @@ function parseRoute() {
   const hash = window.location.hash || "#/";
 
   if (hash === "#/" || hash === "#") {
-    return { type: "dir", path: [] };
+    return { type: "home" };
   }
 
   if (hash.startsWith("#/dir/")) {
@@ -631,6 +631,8 @@ commands.set("whoami", () =>
 );
 commands.set("clear", () => {
   output.innerHTML = "";
+  currentPath = [];
+  setRoute("#/");
   updatePrompt();
   scrollToTop();
 });
@@ -724,6 +726,14 @@ function openEntryPath(path, commandText, options = {}) {
 async function navigateFromHash() {
   const route = parseRoute();
   activeRoute = window.location.hash || "#/";
+
+  if (route.type === "home") {
+    currentPath = [];
+    output.innerHTML = "";
+    updatePrompt();
+    scrollToTop();
+    return;
+  }
 
   if (route.type === "dir") {
     const node = getNode(route.path);
