@@ -257,20 +257,21 @@ input {
   animation: logo-glitch-cyan 3.4s steps(2, end) infinite;
 }
 
-.ascii {
+.wordmark {
   position: relative;
   z-index: 1;
   margin: 0;
   color: var(--green);
-  font-size: 1.05rem;
-  line-height: 1;
-  white-space: pre;
-  overflow-x: auto;
+  font-size: 4.4rem;
+  font-weight: 900;
+  line-height: 0.92;
+  white-space: nowrap;
   text-shadow:
     0 0 5px rgba(63, 245, 138, 0.55),
     0 0 18px rgba(63, 245, 138, 0.35),
     2px 0 0 rgba(92, 200, 255, 0.16),
     -2px 0 0 rgba(255, 107, 107, 0.12);
+  text-transform: none;
   filter: drop-shadow(0 0 18px rgba(63, 245, 138, 0.42));
   animation:
     logo-scan 4.8s linear infinite,
@@ -739,8 +740,8 @@ p {
     display: none;
   }
 
-  .ascii {
-    font-size: 0.48rem;
+  .wordmark {
+    font-size: 2.25rem;
   }
 
   .terminal-row {
@@ -759,8 +760,8 @@ p {
 }
 
 @media (min-width: 721px) and (max-width: 980px) {
-  .ascii {
-    font-size: 0.78rem;
+  .wordmark {
+    font-size: 3.35rem;
   }
 }
 
