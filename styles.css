@@ -120,15 +120,16 @@ input {
 }
 
 .intro {
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .ascii {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: var(--green);
-  font-size: 1.05rem;
-  line-height: 1.35;
-  white-space: normal;
+  font-size: clamp(0.52rem, 1.1vw, 0.82rem);
+  line-height: 1;
+  white-space: pre;
+  overflow-x: auto;
 }
 
 p {
@@ -391,7 +392,7 @@ p {
   }
 
   .ascii {
-    font-size: 0.68rem;
+    font-size: 0.46rem;
   }
 
   .terminal-row {
