@@ -60,7 +60,7 @@ const filesystem = {
       date: "remote",
       children: [
         remoteNote("README.md"),
-        remoteDir("Computer_Architecture", [
+        hiddenRemoteDir("Computer_Architecture", [
           "Caches.md",
           "CLanguage.md",
           "IntroductionAndDataRepresentation.md",
@@ -73,7 +73,7 @@ const filesystem = {
           "SynchronousDigitalSystems.md",
           "VirtualMemory.md",
         ]),
-        remoteDir("Computer_Networking", [
+        hiddenRemoteDir("Computer_Networking", [
           "ApplicationDNSHTTP.md",
           "EndToEnd.md",
           "Introduction.md",
@@ -83,7 +83,7 @@ const filesystem = {
           "TransportCongestionControl.md",
           "TransportTCP.md",
         ]),
-        remoteDir("Data_Structures_and_Algorithms", [
+        hiddenRemoteDir("Data_Structures_and_Algorithms", [
           "ArrayLists.md",
           "B-Trees.md",
           "BasicSorts.md",
@@ -99,8 +99,8 @@ const filesystem = {
           "RadixSorts.md",
           "RedBlackTrees.md",
         ]),
-        remoteDir("LeetCodeInC", ["ArrayList.md"]),
-        remoteDir("Operating_System", [
+        hiddenRemoteDir("LeetCodeInC", ["ArrayList.md"]),
+        hiddenRemoteDir("Operating_System", [
           "Intro.md",
           "Protection.md",
           "Synchronization.md",
@@ -139,6 +139,13 @@ function remoteDir(name, files) {
     name,
     date: "remote",
     children: files.map((file) => remoteNote(`${name}/${file}`)),
+  };
+}
+
+function hiddenRemoteDir(name, files) {
+  return {
+    ...remoteDir(name, files),
+    hidden: true,
   };
 }
 
@@ -416,6 +423,7 @@ function renderList() {
     : "";
 
   const rows = directory.children
+    .filter((entry) => !entry.hidden)
     .map((entry) => {
       const displayName = entry.type === "dir" ? `${entry.name}/` : entry.name;
       const action = entry.type === "dir" ? `data-cd="${entry.name}"` : `data-open="${entry.name}"`;
@@ -443,7 +451,7 @@ function renderHelp() {
   return `
     <ul class="terminal-list">
       <li><button class="link-command" data-command="ls">ls</button> - list current directory</li>
-      <li><button class="link-command" data-command="cd cs-self-study">cd cs-self-study</button> - browse CS self-study notes</li>
+      <li><button class="link-command" data-command="open cs-self-study/README.md">open cs-self-study/README.md</button> - browse CS self-study notes from the curated README</li>
       <li><button class="link-command" data-command="cd notes">cd notes</button> - enter a directory</li>
       <li><button class="link-command" data-command="cd ..">cd ..</button> - go up one directory</li>
       <li><button class="link-command" data-command="open notes/hello-terminal-blog.md">open &lt;file&gt;</button> - read a page or post by name or path</li>

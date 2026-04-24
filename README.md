@@ -2,10 +2,11 @@
 
 A terminal-inspired personal blog for GitHub Pages.
 
-The `cs-self-study/` directory reads Markdown notes from
+The `cs-self-study/README.md` entry reads Markdown notes from
 `TigerkidYang/CS_Self-study_Notes` at runtime through GitHub raw URLs. Markdown
 is rendered in the terminal shell with image path rewriting, code highlighting,
-and KaTeX math rendering.
+and KaTeX math rendering. The README is the curated table of contents; linked
+notes open inside the same terminal shell.
 
 ## Local usage
 
