@@ -56,6 +56,59 @@ const filesystem = {
     },
     {
       type: "dir",
+      name: "cs-self-study",
+      date: "remote",
+      children: [
+        remoteNote("README.md"),
+        remoteDir("Computer_Architecture", [
+          "Caches.md",
+          "CLanguage.md",
+          "IntroductionAndDataRepresentation.md",
+          "IOSystems.md",
+          "NumberRepresentation.md",
+          "Pipelining.md",
+          "RISC-V_I.md",
+          "RISC-V_II.md",
+          "SingleCycleCPU.md",
+          "SynchronousDigitalSystems.md",
+          "VirtualMemory.md",
+        ]),
+        remoteDir("Computer_Networking", [
+          "ApplicationDNSHTTP.md",
+          "EndToEnd.md",
+          "Introduction.md",
+          "RoutingBGP.md",
+          "RoutingLinkStateRouters.md",
+          "RoutingPrinciplesDistanceVector.md",
+          "TransportCongestionControl.md",
+          "TransportTCP.md",
+        ]),
+        remoteDir("Data_Structures_and_Algorithms", [
+          "ArrayLists.md",
+          "B-Trees.md",
+          "BasicSorts.md",
+          "BinarySearchTrees.md",
+          "DijkstrasAlgorithm.md",
+          "DisjointSets.md",
+          "GraphDFSandBFS.md",
+          "Hashing.md",
+          "HeapsandPQs.md",
+          "LinkedLists.md",
+          "MSTs.md",
+          "QuickSort.md",
+          "RadixSorts.md",
+          "RedBlackTrees.md",
+        ]),
+        remoteDir("LeetCodeInC", ["ArrayList.md"]),
+        remoteDir("Operating_System", [
+          "Intro.md",
+          "Protection.md",
+          "Synchronization.md",
+        ]),
+      ],
+    },
+    {
+      type: "dir",
       name: "projects",
       date: "2026-04-24",
       children: [
@@ -73,6 +126,30 @@ const filesystem = {
     },
   ],
 };
+
+const CS_NOTES_OWNER = "TigerkidYang";
+const CS_NOTES_REPO = "CS_Self-study_Notes";
+const CS_NOTES_BRANCH = "main";
+const CS_NOTES_RAW_BASE = `https://raw.githubusercontent.com/${CS_NOTES_OWNER}/${CS_NOTES_REPO}/${CS_NOTES_BRANCH}/`;
+const CS_NOTES_BLOB_BASE = `https://github.com/${CS_NOTES_OWNER}/${CS_NOTES_REPO}/blob/${CS_NOTES_BRANCH}/`;
+
+function remoteDir(name, files) {
+  return {
+    type: "dir",
+    name,
+    date: "remote",
+    children: files.map((file) => remoteNote(`${name}/${file}`)),
+  };
+}
+
+function remoteNote(repoPath) {
+  return {
+    type: "remotePost",
+    name: repoPath.split("/").at(-1),
+    date: "remote",
+    repoPath,
+  };
+}
 
 const commands = new Map();
 const output = document.querySelector("#output");
@@ -121,6 +198,7 @@ function renderScreen(commandText, html) {
   bindCommandButtons(block);
   updatePrompt();
   scrollToTop();
+  return block;
 }
 
 function getNode(path = currentPath) {
@@ -177,6 +255,150 @@ function resolveEntry(target) {
   return { node, path };
 }
 
+function findRemoteNoteByRepoPath(repoPath) {
+  const segments = ["cs-self-study", ...repoPath.split("/")];
+  return { node: getNode(segments), path: segments };
+}
+
+function encodeRepoPath(repoPath) {
+  return repoPath.split("/").map(encodeURIComponent).join("/");
+}
+
+function resolveRelativeRepoPath(repoPath, target) {
+  const cleanTarget = target.split("#")[0].split("?")[0];
+  const base = repoPath.split("/").slice(0, -1);
+  const parts = cleanTarget.split("/");
+
+  for (const part of parts) {
+    if (!part || part === ".") {
+      continue;
+    }
+
+    if (part === "..") {
+      base.pop();
+      continue;
+    }
+
+    base.push(part);
+  }
+
+  return base.join("/");
+}
+
+function isExternalUrl(url) {
+  return /^(?:[a-z][a-z0-9+.-]*:|#|\/\/)/i.test(url);
+}
+
+function rawUrlFor(repoPath) {
+  return `${CS_NOTES_RAW_BASE}${encodeRepoPath(repoPath)}`;
+}
+
+function blobUrlFor(repoPath) {
+  return `${CS_NOTES_BLOB_BASE}${encodeRepoPath(repoPath)}`;
+}
+
+function rewriteMarkdownUrls(markdown, repoPath) {
+  return markdown
+    .replace(/(!?\[[^\]]*])\(([^)\s]+)(?:\s+"[^"]*")?\)/g, (match, label, url) => {
+      if (isExternalUrl(url)) {
+        return match;
+      }
+
+      const resolvedPath = resolveRelativeRepoPath(repoPath, url);
+      const hash = url.includes("#") ? `#${url.split("#").slice(1).join("#")}` : "";
+      const rewrittenUrl = resolvedPath.toLowerCase().endsWith(".md")
+        ? `#note:${encodeURIComponent(resolvedPath)}`
+        : `${rawUrlFor(resolvedPath)}${hash}`;
+
+      return `${label}(${rewrittenUrl})`;
+    })
+    .replace(/(<img\b[^>]*\bsrc=["'])([^"']+)(["'][^>]*>)/gi, (match, before, url, after) => {
+      if (isExternalUrl(url)) {
+        return match;
+      }
+
+      return `${before}${rawUrlFor(resolveRelativeRepoPath(repoPath, url))}${after}`;
+    });
+}
+
+function markdownToHtml(markdown, repoPath) {
+  const rewritten = rewriteMarkdownUrls(markdown, repoPath);
+
+  if (!window.marked) {
+    return `<pre>${escapeHtml(rewritten)}</pre>`;
+  }
+
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+    highlight(code, language) {
+      if (!window.hljs) {
+        return code;
+      }
+
+      const normalizedLanguage = hljs.getLanguage(language) ? language : "plaintext";
+      return hljs.highlight(code, { language: normalizedLanguage }).value;
+    },
+  });
+
+  const html = marked.parse(rewritten);
+  return window.DOMPurify ? DOMPurify.sanitize(html) : html;
+}
+
+function enhanceArticle(article) {
+  article.querySelectorAll('a[href^="#note:"]').forEach((link) => {
+    const repoPath = decodeURIComponent(link.getAttribute("href").slice("#note:".length));
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      const { node } = findRemoteNoteByRepoPath(repoPath);
+
+      if (node) {
+        openRemotePost(node, `open ${repoPath}`);
+        return;
+      }
+
+      window.open(blobUrlFor(repoPath), "_blank", "noreferrer");
+    });
+  });
+
+  article.querySelectorAll("a[href]").forEach((link) => {
+    const href = link.getAttribute("href");
+    if (href?.startsWith("http")) {
+      link.setAttribute("target", "_blank");
+      link.setAttribute("rel", "noreferrer");
+    }
+  });
+
+  if (window.hljs) {
+    article.querySelectorAll("pre code").forEach((block) => {
+      const languageClass = [...block.classList].find((className) =>
+        className.startsWith("language-"),
+      );
+      const language = languageClass?.replace("language-", "");
+
+      if (language && hljs.getLanguage(language)) {
+        block.innerHTML = hljs.highlight(block.textContent, { language }).value;
+        block.classList.add("hljs");
+        return;
+      }
+
+      hljs.highlightElement(block);
+    });
+  }
+
+  if (window.renderMathInElement) {
+    renderMathInElement(article, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  }
+}
+
 function fileMode(entry) {
   return entry.type === "dir" ? "drwxr-xr-x" : "-rw-r--r--";
 }
@@ -221,6 +443,7 @@ function renderHelp() {
   return `
     <ul class="terminal-list">
       <li><button class="link-command" data-command="ls">ls</button> - list current directory</li>
+      <li><button class="link-command" data-command="cd cs-self-study">cd cs-self-study</button> - browse CS self-study notes</li>
       <li><button class="link-command" data-command="cd notes">cd notes</button> - enter a directory</li>
       <li><button class="link-command" data-command="cd ..">cd ..</button> - go up one directory</li>
       <li><button class="link-command" data-command="open notes/hello-terminal-blog.md">open &lt;file&gt;</button> - read a page or post by name or path</li>
@@ -255,7 +478,37 @@ function changeDirectory(target, commandText = `cd ${target}`) {
   showDirectory(commandText);
 }
 
-function openEntry(target, commandText = `open ${target}`) {
+async function openRemotePost(node, commandText = `open ${node.repoPath}`) {
+  const parentPath = ["cs-self-study", ...node.repoPath.split("/").slice(0, -1)];
+  const parentTarget = parentPath.length ? `~/${parentPath.join("/")}` : "~";
+  renderScreen(
+    commandText,
+    `<article class="article markdown-article"><p class="meta">Loading ${escapeHtml(node.repoPath)} from GitHub...</p></article>`,
+  );
+
+  try {
+    const response = await fetch(rawUrlFor(node.repoPath));
+
+    if (!response.ok) {
+      throw new Error(`GitHub returned ${response.status}`);
+    }
+
+    const markdown = await response.text();
+    const articleHtml = markdownToHtml(markdown, node.repoPath);
+    const block = renderScreen(
+      commandText,
+      `<article class="article markdown-article">${articleHtml}<p class="article-nav"><button class="link-command" data-cd="${parentTarget}">back to ${escapeHtml(displayPath(parentPath))}</button> <a class="link-command" href="${blobUrlFor(node.repoPath)}" target="_blank" rel="noreferrer">view on GitHub</a></p></article>`,
+    );
+    enhanceArticle(block.querySelector(".markdown-article"));
+  } catch (error) {
+    renderScreen(
+      commandText,
+      `<p class="error">Could not load ${escapeHtml(node.repoPath)}. ${escapeHtml(error.message)}.</p><p><a class="link-command" href="${blobUrlFor(node.repoPath)}" target="_blank" rel="noreferrer">Open it on GitHub</a></p>`,
+    );
+  }
+}
+
+async function openEntry(target, commandText = `open ${target}`) {
   const { node, path } = resolveEntry(target);
 
   if (!node) {
@@ -269,6 +522,11 @@ function openEntry(target, commandText = `open ${target}`) {
   if (node.type === "dir") {
     currentPath = path;
     showDirectory(`cd ${target}`);
+    return;
+  }
+
+  if (node.type === "remotePost") {
+    await openRemotePost(node, commandText);
     return;
   }
 
